@@ -1,0 +1,1388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Growth vs. Scale — The Scaling Framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F3F3F3;
+    --bg-2: #ECEAE3;
+    --ink: #1A1A1A;
+    --ink-soft: #2a2a2a;
+    --muted: #6e6e6e;
+    --muted-2: #a1a1a1;
+    --line: #d9d6cc;
+    --line-soft: #e7e4da;
+    --gold: #CCBA78;
+    --gold-deep: #b39e57;
+    --slate: #809498;
+    --slate-deep: #5e7378;
+    --paper: #FAF9F5;
+    --ink-paper: #FFFCF4;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  .serif { font-family: 'Instrument Serif', 'Times New Roman', serif; font-weight: 400; letter-spacing: -0.01em; }
+  .mono  { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  ::selection { background: var(--gold); color: var(--ink); }
+
+  /* ----- progress bar ----- */
+  .progress {
+    position: fixed; inset: 0 0 auto 0; height: 2px;
+    background: transparent; z-index: 60; pointer-events: none;
+  }
+  .progress .bar { height: 100%; width: 0; background: var(--gold); transition: width .1s linear; }
+
+  /* ----- top nav ----- */
+  nav.top {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px;
+    background: rgba(243, 243, 243, 0.78);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+    border-bottom: 1px solid transparent;
+    transition: border-color .25s ease, background .25s ease;
+  }
+  nav.top.scrolled { border-bottom-color: var(--line); }
+  nav.top .brand {
+    font-family: 'Instrument Serif', serif; font-size: 22px;
+    letter-spacing: 0.01em;
+  }
+  nav.top .brand i { font-style: italic; color: var(--muted); }
+  nav.top .brand .dot { display: inline-block; width: 6px; height: 6px; background: var(--gold); border-radius: 50%; margin: 0 8px 2px; vertical-align: middle; }
+  nav.top ul {
+    display: flex; gap: 28px; list-style: none; margin: 0; padding: 0;
+    font-size: 13px; color: var(--muted); letter-spacing: 0.04em;
+  }
+  nav.top ul a {
+    color: inherit; text-decoration: none; padding: 4px 0;
+    border-bottom: 1px solid transparent; transition: color .2s, border-color .2s;
+  }
+  nav.top ul a:hover { color: var(--ink); border-bottom-color: var(--gold); }
+  nav.top ul a.active { color: var(--ink); border-bottom-color: var(--gold); }
+  @media (max-width: 820px) { nav.top ul { display: none; } }
+
+  /* ----- layout primitives ----- */
+  section { padding: 120px 32px; position: relative; }
+  .container { max-width: 1180px; margin: 0 auto; }
+  .narrow    { max-width: 820px;  margin: 0 auto; }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); display: inline-flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before {
+    content: ""; width: 24px; height: 1px; background: var(--gold);
+    display: inline-block;
+  }
+
+  h1, h2, h3 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
+  h1.display { font-family: 'Instrument Serif', serif; font-size: clamp(60px, 9vw, 144px); line-height: 0.95; }
+  h2.display { font-family: 'Instrument Serif', serif; font-size: clamp(40px, 5.4vw, 80px); line-height: 1.02; }
+  h3.display { font-family: 'Instrument Serif', serif; font-size: clamp(28px, 3vw, 44px); line-height: 1.1; }
+  p.lead   { font-size: 19px; line-height: 1.55; color: var(--ink-soft); max-width: 60ch; }
+  p.muted  { color: var(--muted); }
+
+  /* reveal on scroll */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .reveal.delay-1 { transition-delay: .08s; }
+  .reveal.delay-2 { transition-delay: .16s; }
+  .reveal.delay-3 { transition-delay: .24s; }
+  .reveal.delay-4 { transition-delay: .32s; }
+  .reveal.delay-5 { transition-delay: .40s; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* ===== HERO ===== */
+  .hero { padding-top: 200px; padding-bottom: 140px; min-height: 100vh; display: flex; align-items: center; }
+  .hero .container { width: 100%; }
+  .hero-grid { display: grid; grid-template-columns: 1fr; gap: 48px; align-items: end; }
+  .hero h1 {
+    display: grid; grid-template-columns: auto; gap: 0;
+  }
+  .hero .vs {
+    font-style: italic; color: var(--gold); margin: 0 24px;
+    transform: translateY(-12px); display: inline-block;
+  }
+  .hero h1 .line { display: block; }
+  .hero h1 .line.right { text-align: right; padding-right: 8%; }
+  .hero h1 .line.left { padding-left: 8%; }
+  .hero-meta {
+    display: flex; gap: 64px; flex-wrap: wrap;
+    padding-top: 40px; border-top: 1px solid var(--line);
+  }
+  .hero-meta .item { max-width: 320px; }
+  .hero-meta .item .k { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .hero-meta .item .v { font-family: 'Instrument Serif', serif; font-size: 22px; line-height: 1.25; }
+
+  .scroll-hint {
+    position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em;
+    color: var(--muted); text-transform: uppercase;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .scroll-hint .line {
+    width: 1px; height: 36px; background: linear-gradient(var(--gold), transparent);
+    animation: drip 2.2s ease-in-out infinite;
+  }
+  @keyframes drip {
+    0%, 100% { opacity: 1; transform: scaleY(1); transform-origin: top; }
+    50%      { opacity: .3; transform: scaleY(.4); }
+  }
+
+  /* ===== Linear vs Power Law chart ===== */
+  .chart-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 40px 36px 28px;
+    position: relative;
+  }
+  .chart-card .axis-y, .chart-card .axis-x {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.04em;
+  }
+  .chart-legend {
+    display: flex; flex-wrap: wrap; gap: 28px; margin-top: 24px;
+    font-size: 13px; color: var(--ink-soft);
+  }
+  .chart-legend .item { display: flex; align-items: center; gap: 10px; }
+  .chart-legend .swatch { width: 18px; height: 2px; background: var(--slate); }
+  .chart-legend .swatch.gold { background: var(--gold); height: 2px; }
+  .chart-legend .swatch.gold.thick { height: 3px; }
+
+  /* ===== Bell curve vs Power law ===== */
+  .toggle-row {
+    display: inline-flex; gap: 4px; padding: 4px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 999px;
+  }
+  .toggle-row button {
+    border: 0; background: transparent;
+    padding: 8px 18px; border-radius: 999px;
+    font-family: 'Manrope', sans-serif; font-size: 13px; color: var(--muted);
+    cursor: pointer; transition: all .25s ease;
+    letter-spacing: 0.02em;
+  }
+  .toggle-row button.active { background: var(--ink); color: var(--bg); }
+
+  /* ===== Section header with framework chips ===== */
+  .frame-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); margin-top: 80px; border: 1px solid var(--line); }
+  .frame-list .cell {
+    background: var(--bg); padding: 36px 32px;
+    display: flex; flex-direction: column; gap: 14px; min-height: 240px;
+    transition: background .3s ease;
+  }
+  .frame-list .cell:hover { background: var(--paper); }
+  .frame-list .cell .n {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase;
+  }
+  .frame-list .cell .h { font-family: 'Instrument Serif', serif; font-size: 36px; line-height: 1.1; }
+  .frame-list .cell .p { color: var(--muted); font-size: 15px; line-height: 1.55; }
+  @media (max-width: 820px) { .frame-list { grid-template-columns: 1fr; } }
+
+  /* ===== Pull quote ===== */
+  .pullquote {
+    text-align: center; padding: 80px 0;
+    position: relative;
+  }
+  .pullquote .mark {
+    font-family: 'Instrument Serif', serif; font-size: 120px; line-height: 1;
+    color: var(--gold); display: block; margin: 0 auto 0px; height: 60px;
+  }
+  .pullquote blockquote {
+    margin: 0 auto; max-width: 920px;
+    font-family: 'Instrument Serif', serif; font-style: italic;
+    font-size: clamp(28px, 4vw, 52px); line-height: 1.18; letter-spacing: -0.01em;
+  }
+  .pullquote cite {
+    display: block; margin-top: 28px; font-style: normal;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+  }
+
+  /* ===== Mastery of Past tabs ===== */
+  .tabs { display: flex; gap: 32px; border-bottom: 1px solid var(--line); margin-bottom: 48px; }
+  .tabs button {
+    background: transparent; border: 0; padding: 18px 2px; cursor: pointer;
+    font-family: 'Instrument Serif', serif; font-size: 28px; color: var(--muted-2);
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: color .25s, border-color .25s;
+  }
+  .tabs button.active { color: var(--ink); border-color: var(--gold); }
+  .tabs button .sub { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: var(--muted); text-transform: uppercase; margin-top: 4px; font-style: normal; }
+
+  .q-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 56px; }
+  .q-list .q {
+    border-top: 1px solid var(--line);
+    padding: 22px 0;
+    display: grid; grid-template-columns: 40px 1fr; gap: 16px;
+    transition: background .3s;
+  }
+  .q-list .q .n {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--gold); letter-spacing: 0.08em; padding-top: 4px;
+  }
+  .q-list .q .t { font-family: 'Instrument Serif', serif; font-size: 22px; line-height: 1.3; }
+  @media (max-width: 820px) { .q-list { grid-template-columns: 1fr; } }
+
+  /* ===== Bell-curve interactive ===== */
+  .bell-wrap { position: relative; }
+  .tier-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); margin-top: 32px; border: 1px solid var(--line); }
+  .tier-row button {
+    border: 0; background: var(--bg); padding: 20px;
+    text-align: left; cursor: pointer; transition: background .3s;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .tier-row button:hover { background: var(--paper); }
+  .tier-row button.active { background: var(--ink); color: var(--bg); }
+  .tier-row button.active .label { color: var(--gold); }
+  .tier-row button .v { font-family: 'Instrument Serif', serif; font-size: 32px; line-height: 1; }
+  .tier-row button .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  .tier-row button.active .v { color: var(--bg); }
+
+  /* ===== 3 Levels Strategy ===== */
+  .levels { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin-top: 60px; border-top: 1px solid var(--line); }
+  .levels .lvl {
+    padding: 40px 32px; border-right: 1px solid var(--line);
+    position: relative; transition: background .35s;
+  }
+  .levels .lvl:last-child { border-right: 0; }
+  .levels .lvl:hover { background: var(--paper); }
+  .levels .lvl .num {
+    font-family: 'Instrument Serif', serif; font-size: 80px; line-height: 1;
+    color: var(--gold); margin-bottom: 28px; font-style: italic;
+  }
+  .levels .lvl .kicker { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .levels .lvl h3 { font-family: 'Instrument Serif', serif; font-size: 32px; margin-bottom: 6px; }
+  .levels .lvl .sub { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+  .levels .lvl p { color: var(--ink-soft); font-size: 15px; line-height: 1.55; }
+  @media (max-width: 820px) { .levels { grid-template-columns: 1fr; } .levels .lvl { border-right: 0; border-bottom: 1px solid var(--line); } }
+
+  /* ===== Different not better ===== */
+  .principle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 56px; }
+  .principle {
+    background: var(--paper); border: 1px solid var(--line);
+    padding: 28px; border-radius: 4px;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: transform .35s ease, box-shadow .35s ease;
+  }
+  .principle:hover { transform: translateY(-3px); box-shadow: 0 12px 40px -20px rgba(0,0,0,0.18); }
+  .principle .head { font-family: 'Instrument Serif', serif; font-size: 24px; line-height: 1.2; }
+  .principle .body { color: var(--muted); font-size: 14px; line-height: 1.55; }
+  .principle .tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }
+  @media (max-width: 820px) { .principle-grid { grid-template-columns: 1fr; } }
+
+  /* ===== Floor diagram ===== */
+  .floor-fig { position: relative; }
+  .floor-row { display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: center; }
+  .floor-card { padding: 32px; border: 1px solid var(--line); background: var(--paper); border-radius: 4px; }
+  .floor-card .lbl { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  .floor-card .h { font-family: 'Instrument Serif', serif; font-size: 32px; margin: 6px 0 12px; }
+  .floor-card p { color: var(--ink-soft); font-size: 15px; line-height: 1.6; margin: 0; }
+  @media (max-width: 820px) { .floor-row { grid-template-columns: 1fr; } }
+
+  /* ===== Flywheel ===== */
+  .flywheel-wrap { display: grid; grid-template-columns: 1.2fr 1fr; gap: 64px; align-items: center; margin-top: 64px; }
+  .flywheel-list { display: flex; flex-direction: column; gap: 0; }
+  .flywheel-list .node {
+    padding: 22px 0; border-top: 1px solid var(--line);
+    display: grid; grid-template-columns: 36px 1fr auto; gap: 18px; align-items: center;
+    cursor: pointer; transition: padding .3s ease;
+  }
+  .flywheel-list .node:last-child { border-bottom: 1px solid var(--line); }
+  .flywheel-list .node .n { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: 0.12em; }
+  .flywheel-list .node .h { font-family: 'Instrument Serif', serif; font-size: 22px; line-height: 1.2; }
+  .flywheel-list .node .h small { display: block; font-family: 'Manrope', sans-serif; font-size: 13px; color: var(--muted); font-style: normal; margin-top: 4px; }
+  .flywheel-list .node .arrow { color: var(--muted-2); font-family: 'JetBrains Mono', monospace; font-size: 16px; transition: color .3s, transform .3s; }
+  .flywheel-list .node.active { padding-left: 12px; }
+  .flywheel-list .node.active .arrow { color: var(--gold); transform: translateX(4px); }
+  .flywheel-list .node:hover .arrow { color: var(--gold); }
+  @media (max-width: 980px) { .flywheel-wrap { grid-template-columns: 1fr; } }
+
+  /* ===== Final / Going deeper ===== */
+  .deep { background: var(--ink); color: var(--bg); padding: 140px 32px; }
+  .deep .eyebrow { color: var(--gold); }
+  .deep .eyebrow::before { background: var(--gold); }
+  .deep h2 { color: var(--bg); }
+  .deep ul { list-style: none; padding: 0; margin: 0; }
+  .deep ul li {
+    padding: 22px 0; border-top: 1px solid rgba(255,255,255,0.12);
+    font-family: 'Instrument Serif', serif; font-size: 28px; line-height: 1.25;
+    display: grid; grid-template-columns: 56px 1fr; gap: 24px; align-items: baseline;
+  }
+  .deep ul li:last-child { border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .deep ul li .dash { color: var(--gold); }
+  .deep .closing {
+    margin-top: 80px; padding-top: 48px; border-top: 1px solid rgba(255,255,255,0.12);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 56px;
+  }
+  .deep .closing .q { font-family: 'Instrument Serif', serif; font-size: 30px; line-height: 1.25; }
+  .deep .closing .q small { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: 0.18em; margin-bottom: 12px; }
+  @media (max-width: 820px) { .deep .closing { grid-template-columns: 1fr; } }
+
+  /* footer */
+  footer.foot {
+    padding: 48px 32px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+  }
+
+  /* gold strike animation */
+  .strike { position: relative; display: inline-block; }
+  .strike::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 56%;
+    height: 4px; background: var(--gold); transform-origin: left;
+    transform: scaleX(0); transition: transform 1.1s cubic-bezier(.2,.7,.2,1) .2s;
+  }
+  .strike.in::after { transform: scaleX(1); }
+
+  /* power-law text underline reveal */
+  .glow {
+    background: linear-gradient(transparent 64%, rgba(204,186,120,0.5) 64%);
+    background-size: 0% 100%; background-repeat: no-repeat;
+    transition: background-size 1s ease .2s;
+  }
+  .reveal.in .glow { background-size: 100% 100%; }
+
+  /* utility */
+  .row { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+  .row.between { justify-content: space-between; }
+  .stack { display: flex; flex-direction: column; gap: 24px; }
+
+  /* counters */
+  .stat { display: flex; flex-direction: column; gap: 6px; }
+  .stat .v { font-family: 'Instrument Serif', serif; font-size: 56px; line-height: 1; color: var(--ink); }
+  .stat .v .unit { font-family: 'Manrope', sans-serif; font-size: 18px; color: var(--muted); margin-left: 4px; vertical-align: 12px; }
+  .stat .l { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
+
+  /* big nav anchor offset */
+  section[id] { scroll-margin-top: 80px; }
+</style>
+</head>
+<body>
+
+<div class="progress"><div class="bar" id="progressBar"></div></div>
+
+<nav class="top" id="topnav">
+  <div class="brand">Growth<span class="dot"></span><i>Scale</i></div>
+  <ul>
+    <li><a href="#frame" data-link>The Framework</a></li>
+    <li><a href="#powerlaw" data-link>Power Law</a></li>
+    <li><a href="#strategy" data-link>Strategy</a></li>
+    <li><a href="#scale" data-link>Scale</a></li>
+    <li><a href="#vision" data-link>10x Vision</a></li>
+  </ul>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="container">
+    <div class="reveal eyebrow">A Scaling Workshop · May 2026</div>
+    <h1 class="display reveal delay-1" style="margin-top: 28px;">
+      <span class="line">Growth</span>
+      <span class="line right"><i style="font-family:'Instrument Serif'; color:var(--gold);">vs.</i> Scale</span>
+    </h1>
+    <p class="lead reveal delay-2" style="margin-top: 56px; max-width: 56ch;">
+      Growth is linear &mdash; more inputs, more outputs.
+      Scale is a <span class="glow">power law</span> &mdash; the same inputs produce
+      ten, a hundred, a thousand times the result. This is the framework that separates the two.
+    </p>
+    <div class="hero-meta reveal delay-3" style="margin-top: 80px;">
+      <div class="item"><div class="k">01 — Frame</div><div class="v">Operate from the future, not the past.</div></div>
+      <div class="item"><div class="k">02 — Floor</div><div class="v">Raise what you tolerate. Cut what compounds backwards.</div></div>
+      <div class="item"><div class="k">03 — Focus</div><div class="v">Concentrate every ounce on the power-law axis.</div></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="line"></div>Scroll</div>
+</section>
+
+<!-- ============ THE 10X GAP ============ -->
+<section id="gap">
+  <div class="container">
+    <div class="reveal eyebrow">The 10x Gap</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 18ch;">
+      The linear path is not <i>slower</i>.<br>
+      It's a <span class="glow">different path</span>.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 32px;">
+      Most people optimize the road they're already on. But a 10x outcome is rarely reached by
+      running harder. It's reached by choosing a different curve — one that compounds.
+    </p>
+
+    <div class="reveal delay-3" style="margin-top: 72px;">
+      <div class="chart-card">
+        <div class="row between" style="margin-bottom: 32px;">
+          <div>
+            <div class="axis-y">Growth</div>
+            <div class="serif" style="font-size: 30px;">Linear vs. Power-Law over 1 Year</div>
+          </div>
+          <div class="stat" style="text-align:right; align-items:flex-end;">
+            <div class="v"><span id="gapMult">10</span><span class="unit">×</span></div>
+            <div class="l">Gap at Day 365</div>
+          </div>
+        </div>
+
+        <svg viewBox="0 0 900 360" id="gapChart" style="width: 100%; height: auto; display: block;">
+          <!-- grid -->
+          <g stroke="var(--line-soft)" stroke-width="1">
+            <line x1="60" y1="40"  x2="880" y2="40"/>
+            <line x1="60" y1="120" x2="880" y2="120"/>
+            <line x1="60" y1="200" x2="880" y2="200"/>
+            <line x1="60" y1="280" x2="880" y2="280"/>
+            <line x1="60" y1="320" x2="880" y2="320"/>
+          </g>
+          <!-- y axis labels -->
+          <g font-family="JetBrains Mono" font-size="10" fill="var(--muted)">
+            <text x="50" y="44"  text-anchor="end">1000</text>
+            <text x="50" y="124" text-anchor="end">750</text>
+            <text x="50" y="204" text-anchor="end">500</text>
+            <text x="50" y="284" text-anchor="end">250</text>
+            <text x="50" y="324" text-anchor="end">0</text>
+          </g>
+          <!-- x axis -->
+          <g font-family="JetBrains Mono" font-size="10" fill="var(--muted)">
+            <text x="60"  y="345">Month 0</text>
+            <text x="470" y="345" text-anchor="middle">Month 6</text>
+            <text x="880" y="345" text-anchor="end">Month 12</text>
+          </g>
+
+          <!-- linear -->
+          <path id="linePathLinear" d="M60,320 L880,288"
+            stroke="var(--slate)" stroke-width="2" fill="none"
+            stroke-dasharray="900" stroke-dashoffset="900"/>
+          <!-- power -->
+          <path id="linePathPower" d=""
+            stroke="var(--gold)" stroke-width="3" fill="none"
+            stroke-dasharray="1400" stroke-dashoffset="1400"/>
+
+          <!-- end markers (filled in by JS) -->
+          <circle id="endLinear" cx="880" cy="288" r="0" fill="var(--slate)"/>
+          <circle id="endPower" cx="880" cy="40" r="0" fill="var(--gold)"/>
+
+          <!-- labels at end -->
+          <text id="lblLinear" x="868" y="280" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="var(--slate-deep)" opacity="0">The Linear Path · 100</text>
+          <text id="lblPower"  x="868" y="32"  text-anchor="end" font-family="Instrument Serif" font-style="italic" font-size="18" fill="var(--ink)" opacity="0">The best path & people · 1,000</text>
+        </svg>
+
+        <div class="chart-legend">
+          <div class="item"><span class="swatch"></span> Linear growth · same path, more hours</div>
+          <div class="item"><span class="swatch gold thick"></span> Power-law scale · different axis, compounding pathway</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PEOPLE ARE A POWER LAW ============ -->
+<section id="powerlaw" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="row between" style="align-items: flex-end; gap: 56px; flex-wrap: wrap;">
+      <div style="max-width: 640px;">
+        <div class="reveal eyebrow">People &amp; Performance</div>
+        <h2 class="display reveal delay-1" style="margin-top: 24px;">
+          A bell curve is the average.<br>
+          A <i>power law</i> is the <span class="glow">outlier</span>.
+        </h2>
+        <p class="lead reveal delay-2" style="margin-top: 28px;">
+          Pay attention to where the world distributes by averages, and where a tiny minority owns
+          almost all of the result. The decision of which curve you're operating on changes everything.
+        </p>
+      </div>
+      <div class="reveal delay-3 toggle-row" role="tablist" aria-label="Distribution toggle">
+        <button class="active" data-dist="both">Compare</button>
+        <button data-dist="bell">Bell Curve</button>
+        <button data-dist="power">Power Law</button>
+      </div>
+    </div>
+
+    <div class="reveal delay-4" style="margin-top: 56px;">
+      <div class="chart-card" style="padding: 48px 36px 32px;">
+        <svg viewBox="0 0 1100 380" id="distChart" style="width: 100%; height: auto; display: block;">
+          <!-- baseline -->
+          <line x1="60" y1="340" x2="1040" y2="340" stroke="var(--line)" stroke-width="1"/>
+          <!-- bell curve -->
+          <path id="bellPath" d="" fill="rgba(128,148,152,0.15)" stroke="var(--slate)" stroke-width="2"
+            stroke-dasharray="2200" stroke-dashoffset="2200"/>
+          <!-- power curve -->
+          <path id="powerPath" d="" fill="rgba(204,186,120,0.18)" stroke="var(--gold)" stroke-width="2.5"
+            stroke-dasharray="1600" stroke-dashoffset="1600"/>
+
+          <!-- bell labels (sigma) -->
+          <g id="bellLabels" font-family="JetBrains Mono" font-size="10" fill="var(--muted)" opacity="1">
+            <text x="200" y="362" text-anchor="middle">−2σ</text>
+            <text x="370" y="362" text-anchor="middle">−1σ</text>
+            <text x="550" y="362" text-anchor="middle">μ</text>
+            <text x="730" y="362" text-anchor="middle">+1σ</text>
+            <text x="900" y="362" text-anchor="middle">+2σ</text>
+          </g>
+
+          <!-- text annotations -->
+          <text id="bellAnnotation" x="550" y="180" text-anchor="middle"
+                font-family="Instrument Serif" font-style="italic" font-size="22" fill="var(--slate-deep)" opacity="0">Bell Curve · most cluster around the mean</text>
+          <text id="powerAnnotation" x="180" y="120" text-anchor="start"
+                font-family="Instrument Serif" font-style="italic" font-size="22" fill="var(--ink)" opacity="0">Power Law · a few outliers carry the result</text>
+        </svg>
+
+        <div class="chart-legend" style="margin-top: 8px;">
+          <div class="item"><span class="swatch"></span> Bell curve — averages, defended ranges</div>
+          <div class="item"><span class="swatch gold"></span> Power law — outliers, compounding tails</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Pull quote ============ -->
+<section class="pullquote">
+  <div class="narrow reveal">
+    <span class="mark">“</span>
+    <blockquote>
+      The self is not a thing but a process; it uses the future to organize the present.
+    </blockquote>
+    <cite>Dr. Roy Baumeister</cite>
+  </div>
+</section>
+
+<!-- ============ THE SCALING FRAMEWORK ============ -->
+<section id="frame">
+  <div class="container">
+    <div class="reveal eyebrow">The Scaling Framework</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 18ch;">
+      Operate from the <span class="glow">future</span>, not the past.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 32px;">
+      The past is feedback; the present is where work happens; but only the future can organize
+      both. The framework rests on three operating moves — apply them in order and the rest follows.
+    </p>
+
+    <!-- timeline graphic -->
+    <div class="reveal delay-3" style="margin-top: 72px;">
+      <svg viewBox="0 0 1100 160" style="width: 100%; height: auto; display: block;">
+        <line id="ppfLine" x1="80" y1="80" x2="1020" y2="80" stroke="var(--line)" stroke-width="1"
+              stroke-dasharray="940" stroke-dashoffset="940"/>
+        <g id="ppfNodes" opacity="0">
+          <circle cx="160"  cy="80" r="8" fill="var(--slate)"/>
+          <circle cx="550"  cy="80" r="8" fill="var(--slate)"/>
+          <circle cx="940"  cy="80" r="14" fill="var(--gold)"/>
+          <circle cx="940"  cy="80" r="22" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.4"/>
+        </g>
+        <g font-family="Instrument Serif" font-size="28" fill="var(--ink)" id="ppfLabels" opacity="0">
+          <text x="160"  y="130" text-anchor="middle" fill="var(--muted)">Past</text>
+          <text x="550"  y="130" text-anchor="middle" fill="var(--muted)">Present</text>
+          <text x="940"  y="130" text-anchor="middle"><tspan font-style="italic">Future</tspan></text>
+        </g>
+        <text x="160" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="var(--muted)" id="ppfSubA" opacity="0">FEEDBACK</text>
+        <text x="550" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="var(--muted)" id="ppfSubB" opacity="0">EXECUTION</text>
+        <text x="940" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="var(--gold)" id="ppfSubC" opacity="0">ORGANIZER</text>
+      </svg>
+    </div>
+
+    <div class="frame-list">
+      <div class="cell reveal">
+        <div class="n">01 / Frame</div>
+        <div class="h">Set the future.</div>
+        <div class="p">An impossible goal — 10x in 3 years, not 10–20 — does the strategic work. When the frame is high enough, only one or two paths survive. Position validates itself through the goal; analysis doesn't.</div>
+      </div>
+      <div class="cell reveal delay-1">
+        <div class="n">02 / Floor</div>
+        <div class="h">Raise the line.</div>
+        <div class="p">Define the standard below which you refuse to operate. Most businesses are below their floor in 80% of activity. Complexity is how power-law operators get sucked back into the bell curve.</div>
+      </div>
+      <div class="cell reveal delay-2">
+        <div class="n">03 / Focus</div>
+        <div class="h">One axis. All weight.</div>
+        <div class="p">Concentrate on the few pathways and compounding assets that produce power-law returns. Innovation is saying no to a thousand good things to commit to the one that compounds.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MASTERY OF PAST ============ -->
+<section id="past" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="reveal eyebrow">Mastery of the Past</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 20ch;">
+      Before the future organizes you,<br>integrate <i>where you've been</i>.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 32px;">
+      A short reflection exercise across three time horizons. Pick a horizon. Walk the questions slowly.
+    </p>
+
+    <div class="reveal delay-3" style="margin-top: 64px;">
+      <div class="tabs" role="tablist">
+        <button class="active" data-tab="5y">5 Years<span class="sub">May 2021</span></button>
+        <button data-tab="1y">1 Year<span class="sub">May 2025</span></button>
+        <button data-tab="90d">90 Days<span class="sub">Feb 2026</span></button>
+      </div>
+
+      <div class="q-list" id="qList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Pull quote ============ -->
+<section class="pullquote">
+  <div class="narrow reveal">
+    <span class="mark">“</span>
+    <blockquote>
+      Innovation is saying <i>no</i> to a thousand things.
+    </blockquote>
+    <cite>Steve Jobs</cite>
+  </div>
+</section>
+
+<!-- ============ IDENTIFYING POWER LAW (interactive bell w/ revenue tiers) ============ -->
+<section id="identify">
+  <div class="container">
+    <div class="reveal eyebrow">Identifying the Power Law</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 22ch;">
+      Where do you actually sit<br>on the <span class="glow">revenue curve</span>?
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 28px;">
+      Of roughly 34 million companies in the US, the distribution is brutal. Click a tier to see where
+      it lives on the curve — and how thin the air gets above it.
+    </p>
+
+    <div class="reveal delay-3 bell-wrap" style="margin-top: 56px;">
+      <div class="chart-card" style="padding: 40px 36px 24px;">
+        <svg viewBox="0 0 1100 360" id="tierChart" style="width: 100%; height: auto; display: block;">
+          <line x1="60" y1="310" x2="1040" y2="310" stroke="var(--line)" stroke-width="1"/>
+          <path id="tierBell" d="" fill="rgba(128,148,152,0.10)" stroke="var(--slate)" stroke-width="1.5"/>
+          <path id="tierFill" d="" fill="rgba(204,186,120,0.45)" stroke="none" style="transition: d .6s ease;"/>
+          <line id="tierMark" x1="0" y1="0" x2="0" y2="0" stroke="var(--gold)" stroke-width="2" stroke-dasharray="4 4"/>
+          <circle id="tierDot" cx="0" cy="0" r="6" fill="var(--gold)"/>
+          <text id="tierLabel" x="0" y="0" font-family="Instrument Serif" font-style="italic" font-size="22" fill="var(--ink)" text-anchor="middle"></text>
+          <text id="tierPct"   x="0" y="0" font-family="JetBrains Mono" font-size="11" fill="var(--muted)" text-anchor="middle"></text>
+        </svg>
+      </div>
+
+      <div class="tier-row" role="tablist">
+        <button class="active" data-tier="0">
+          <span class="v">$50<small style="font-size:18px;">k</small></span>
+          <span class="label">Median · most companies</span>
+        </button>
+        <button data-tier="1">
+          <span class="v">$500<small style="font-size:18px;">k</small></span>
+          <span class="label">Solid small business</span>
+        </button>
+        <button data-tier="2">
+          <span class="v">$5<small style="font-size:18px;">m</small></span>
+          <span class="label">~Top 4% in the US</span>
+        </button>
+        <button data-tier="3">
+          <span class="v">$50<small style="font-size:18px;">m</small></span>
+          <span class="label">~Top 0.4% · the tail</span>
+        </button>
+      </div>
+
+      <div style="margin-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
+        <div class="stat"><div class="v" id="cmpA">34<span class="unit">M</span></div><div class="l">Companies in the US</div></div>
+        <div class="stat"><div class="v" id="cmpB">76<span class="unit">%</span></div><div class="l">Of value captured by category leaders</div></div>
+        <div class="stat"><div class="v" id="cmpC">0.04<span class="unit">%</span></div><div class="l">Reach a $50m run-rate</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE POWER LAW STRATEGY — 3 LEVELS ============ -->
+<section id="strategy" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="reveal eyebrow">The Power Law Strategy</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 20ch;">
+      Three levels of <i>engineering</i><br>non-substitutable outcomes.
+    </h2>
+
+    <div class="levels">
+      <div class="lvl reveal">
+        <div class="num">1</div>
+        <div class="kicker">Strategy</div>
+        <h3>What you choose</h3>
+        <div class="sub">Position outside competition</div>
+        <p>Own an axis no one else competes on. Better is bell-curve work; different is power-law work. Define the category — don't fight to win one.</p>
+      </div>
+      <div class="lvl reveal delay-1">
+        <div class="num">2</div>
+        <div class="kicker">System</div>
+        <h3>What you remove</h3>
+        <div class="sub">Raise the floor</div>
+        <p>Cut everything that can't scale. Simplify what remains until it compounds. Every activity you keep is a force pulling you toward the mean.</p>
+      </div>
+      <div class="lvl reveal delay-2">
+        <div class="num">3</div>
+        <div class="kicker">Scale</div>
+        <h3>What you build</h3>
+        <div class="sub">Compound the moat</div>
+        <p>Concentrate on the few pathways and compounding assets that produce power-law returns. Depth becomes the moat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEVEL 1: DIFFERENT, NOT BETTER ============ -->
+<section id="level1">
+  <div class="container">
+    <div class="reveal eyebrow">Level 01 — Strategy</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px;">
+      Be <i>different</i>,<br>
+      <span class="strike">not better.</span>
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 28px;">
+      Strategy is escape, not victory. Competition is for losers — the goal is to occupy an axis where
+      no one else is competing in the first place.
+    </p>
+
+    <div class="principle-grid">
+      <div class="principle reveal">
+        <div class="tag">Principle 01</div>
+        <div class="head">The impossible goal does the strategic work.</div>
+        <div class="body">When the frame is high enough, only one or two paths survive. Position validates itself through the goal — analysis doesn't.</div>
+      </div>
+      <div class="principle reveal delay-1">
+        <div class="tag">Principle 02</div>
+        <div class="head">Own an axis no one else competes on.</div>
+        <div class="body">Better is bell-curve work. Different is power-law work. The whole game is finding — and committing to — a non-substitutable position.</div>
+      </div>
+      <div class="principle reveal delay-2">
+        <div class="tag">Principle 03</div>
+        <div class="head">The 76% rule.</div>
+        <div class="body">Category leaders capture roughly three-quarters of the value. There is no prize for second place in a power-law market.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEVEL 2: RAISE THE FLOOR ============ -->
+<section id="level2" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="reveal eyebrow">Level 02 — System</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 22ch;">
+      Raise the <span class="glow">floor</span>.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 28px;">
+      Most businesses operate below their floor in 80% of activity. Every task you keep that lives
+      below the line is a force quietly pulling you back to the mean.
+    </p>
+
+    <div class="reveal delay-3" style="margin-top: 72px;">
+      <div class="floor-fig">
+        <!-- floor diagram -->
+        <svg viewBox="0 0 1100 320" style="width: 100%; height: auto; display: block;" id="floorSvg">
+          <!-- bars -->
+          <g id="floorBars"></g>
+          <!-- floor line -->
+          <line id="floorLine" x1="60" y1="160" x2="60" y2="160" stroke="var(--gold)" stroke-width="2"/>
+          <text id="floorLineLabel" x="1040" y="152" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="var(--gold)" opacity="0">THE FLOOR · 99.99th percentile of your axis</text>
+        </svg>
+
+        <div class="floor-row" style="margin-top: 48px;">
+          <div class="floor-card reveal">
+            <div class="lbl">The amateur</div>
+            <div class="h">Tries to do too much.</div>
+            <p>Spreads attention across every activity, every opportunity, every audience — and ends up running every system below its floor.</p>
+          </div>
+          <div class="floor-card reveal delay-1" style="background: var(--ink); color: var(--bg); border-color: var(--ink);">
+            <div class="lbl" style="color: var(--gold);">The professional</div>
+            <div class="h" style="color: var(--bg);">Refuses below the floor.</div>
+            <p style="color: rgba(255,255,255,0.78);">Cuts anything below the 99.99th percentile of the axis. Knows the cost of complexity. Defends the line ruthlessly.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEVEL 3: SCALE / FLYWHEEL ============ -->
+<section id="scale">
+  <div class="container">
+    <div class="reveal eyebrow">Level 03 — Scale</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 22ch;">
+      Compound the <i>moat</i>.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 28px;">
+      Depth is the moat. Most stop at competence — mastery is the willingness to go deeper for years
+      past it. Once depth, distribution, and IP feed each other, the flywheel runs on its own.
+    </p>
+
+    <div class="flywheel-wrap">
+      <!-- flywheel SVG -->
+      <div class="reveal">
+        <svg viewBox="0 0 500 500" id="flywheel" style="width: 100%; height: auto; display: block;">
+          <!-- ring -->
+          <circle cx="250" cy="250" r="180" fill="none" stroke="var(--line)" stroke-width="1"/>
+          <circle cx="250" cy="250" r="180" fill="none" stroke="var(--gold)" stroke-width="2"
+                  stroke-dasharray="1131" stroke-dashoffset="1131" id="flyRing"
+                  transform="rotate(-90 250 250)"/>
+          <!-- center -->
+          <circle cx="250" cy="250" r="58" fill="var(--ink)"/>
+          <text x="250" y="244" text-anchor="middle" font-family="JetBrains Mono" font-size="9" letter-spacing="2" fill="var(--gold)">COMPOUNDING</text>
+          <text x="250" y="266" text-anchor="middle" font-family="Instrument Serif" font-style="italic" font-size="20" fill="var(--bg)">flywheel</text>
+
+          <!-- nodes -->
+          <g id="flyNodes" font-family="Manrope" font-size="13" fill="var(--ink)">
+            <!-- positions: top, right, bottom, left -->
+            <g class="flynode" data-i="0">
+              <circle cx="250" cy="70"  r="10" fill="var(--gold)"/>
+              <text x="250" y="48"  text-anchor="middle" font-family="Instrument Serif" font-size="20">Body of Work</text>
+              <text x="250" y="100" text-anchor="middle" font-size="11" fill="var(--muted)">Book · Method · IP</text>
+            </g>
+            <g class="flynode" data-i="1">
+              <circle cx="430" cy="250" r="10" fill="var(--slate)"/>
+              <text x="430" y="232" text-anchor="end" font-family="Instrument Serif" font-size="20">Better Product</text>
+              <text x="430" y="266" text-anchor="end" font-size="11" fill="var(--muted)">AI tools · Framework</text>
+            </g>
+            <g class="flynode" data-i="2">
+              <circle cx="250" cy="430" r="10" fill="var(--gold)"/>
+              <text x="250" y="416" text-anchor="middle" font-family="Instrument Serif" font-size="20">Inbound Demand</text>
+              <text x="250" y="460" text-anchor="middle" font-size="11" fill="var(--muted)">Reputation compounds</text>
+            </g>
+            <g class="flynode" data-i="3">
+              <circle cx="70"  cy="250" r="10" fill="var(--slate)"/>
+              <text x="70"  y="232" text-anchor="start" font-family="Instrument Serif" font-size="20">Distribution</text>
+              <text x="70"  y="266" text-anchor="start" font-size="11" fill="var(--muted)">Super-Whos · 10–100×</text>
+            </g>
+          </g>
+
+          <!-- rotating pointer -->
+          <g id="flyPointer">
+            <line x1="250" y1="250" x2="250" y2="92" stroke="var(--gold)" stroke-width="1.5"/>
+            <circle cx="250" cy="92" r="4" fill="var(--gold)"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="flywheel-list" id="flywheelList">
+        <div class="node active" data-i="0">
+          <div class="n">01</div>
+          <div class="h">Body of work<small>Book, methodology, intellectual property.</small></div>
+          <div class="arrow">→</div>
+        </div>
+        <div class="node" data-i="1">
+          <div class="n">02</div>
+          <div class="h">Better product<small>AI tools, framework — productized depth.</small></div>
+          <div class="arrow">→</div>
+        </div>
+        <div class="node" data-i="2">
+          <div class="n">03</div>
+          <div class="h">Inbound demand<small>Reputation compounds. Cases sharpen the method.</small></div>
+          <div class="arrow">→</div>
+        </div>
+        <div class="node" data-i="3">
+          <div class="n">04</div>
+          <div class="h">Super-Whos &amp; distribution<small>10–100× performers and institutional partners.</small></div>
+          <div class="arrow">→</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10X VISION ============ -->
+<section id="vision" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="reveal eyebrow">10x Vision Workshop</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 22ch;">
+      Operate &amp; organize<br>from the <i>scale</i>, not the climb.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 28px;">
+      The future doesn't arrive — you reverse-engineer back from it. Six questions to translate your
+      power-law axis into a 3-year, fully-specified result.
+    </p>
+
+    <div class="q-list" style="margin-top: 72px;">
+      <div class="q reveal"><div class="n">01</div><div class="t">What does literal <i>10x</i> look like for you — not in 10–20 years, but 3?</div></div>
+      <div class="q reveal delay-1"><div class="n">02</div><div class="t">What would the 10x <i>result</i> be?</div></div>
+      <div class="q reveal"><div class="n">03</div><div class="t">If you operated completely <i>from</i> that 10x result, how would that change what you're doing now?</div></div>
+      <div class="q reveal delay-1"><div class="n">04</div><div class="t">What would the 10x model be? How many units, at what price, to whom?</div></div>
+      <div class="q reveal"><div class="n">05</div><div class="t">What — and who — would fall below the floor, that you're currently doing?</div></div>
+      <div class="q reveal delay-1"><div class="n">06</div><div class="t">Who would you need to involve? What are the power-law pathways to reach 10x in 3 years?</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEEP / GOING DEEPER ============ -->
+<section class="deep">
+  <div class="container">
+    <div class="reveal eyebrow">Going Deeper</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px;">
+      What <i>is</i> your<br>power law?
+    </h2>
+
+    <ul style="margin-top: 64px;">
+      <li class="reveal"><span class="dash">—</span><span>Operating from the future, not the past.</span></li>
+      <li class="reveal delay-1"><span class="dash">—</span><span>Isolating what would work — a possible power law.</span></li>
+      <li class="reveal delay-2"><span class="dash">—</span><span>Eliminating everything below the floor.</span></li>
+      <li class="reveal delay-3"><span class="dash">—</span><span>Mastering the power law — building the team and capability to do it.</span></li>
+      <li class="reveal delay-4"><span class="dash">—</span><span>Separating so far from competition that no one is doing what you're doing. <i style="color:var(--gold);">n of 1.</i></span></li>
+    </ul>
+
+    <div class="closing">
+      <div class="reveal"><div class="q"><small>Question 01</small>What &ldquo;power law&rdquo; would you scale?</div></div>
+      <div class="reveal delay-1"><div class="q"><small>Question 02</small>What would that look like, if you fully executed on it?</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div>Growth vs. Scale — A Scaling Framework Workshop</div>
+  <div>Webpage adapted from the May 2026 keynote</div>
+</footer>
+
+<script>
+/* ============ PROGRESS BAR + NAV ============ */
+const progressBar = document.getElementById('progressBar');
+const topnav = document.getElementById('topnav');
+function onScroll() {
+  const h = document.documentElement;
+  const total = h.scrollHeight - h.clientHeight;
+  const pct = Math.max(0, Math.min(1, (h.scrollTop || document.body.scrollTop) / total));
+  progressBar.style.width = (pct * 100).toFixed(2) + '%';
+  topnav.classList.toggle('scrolled', (h.scrollTop || document.body.scrollTop) > 12);
+}
+document.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+/* ============ NAV ACTIVE LINK ============ */
+const navLinks = [...document.querySelectorAll('nav.top a[data-link]')];
+const sections = navLinks.map(a => document.querySelector(a.getAttribute('href')));
+function syncNav() {
+  const y = (document.documentElement.scrollTop || document.body.scrollTop) + 120;
+  let active = -1;
+  sections.forEach((s, i) => { if (s && s.offsetTop <= y) active = i; });
+  navLinks.forEach((a, i) => a.classList.toggle('active', i === active));
+}
+document.addEventListener('scroll', syncNav, { passive: true });
+syncNav();
+
+/* ============ REVEAL ON SCROLL ============ */
+const io = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (e.isIntersecting) {
+      e.target.classList.add('in');
+      // run any registered callbacks
+      const cb = e.target.__onIn;
+      if (typeof cb === 'function') { cb(); e.target.__onIn = null; }
+    }
+  }
+}, { threshold: 0.18 });
+document.querySelectorAll('.reveal, .strike').forEach(el => io.observe(el));
+
+/* ============ HERO GAP CHART (animated) ============ */
+(function gapChart() {
+  const svg = document.getElementById('gapChart');
+  const linear = document.getElementById('linePathLinear');
+  const power  = document.getElementById('linePathPower');
+  // build power curve: y starts near baseline (y=320) and rises sharply
+  // x: 60 -> 880 (820 wide), y: 320 -> 40 (top)
+  let d = '';
+  const N = 60;
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const x = 60 + t * 820;
+    const v = Math.pow(t, 3); // 0..1
+    const y = 320 - v * 280;
+    d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+  }
+  power.setAttribute('d', d);
+  const pLen = power.getTotalLength();
+  power.style.strokeDasharray = pLen;
+  power.style.strokeDashoffset = pLen;
+
+  // observe
+  let ran = false;
+  const wrap = svg.closest('.reveal');
+  function run() {
+    if (ran) return; ran = true;
+    // linear animate
+    linear.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1)';
+    linear.style.strokeDashoffset = '0';
+    // power animate
+    power.style.transition = 'stroke-dashoffset 1.8s cubic-bezier(.2,.7,.2,1) .2s';
+    power.style.strokeDashoffset = '0';
+    // end markers
+    setTimeout(() => {
+      const eL = document.getElementById('endLinear'); eL.setAttribute('r', '5');
+      eL.style.transition = 'r .3s ease';
+      document.getElementById('lblLinear').style.transition = 'opacity .5s ease';
+      document.getElementById('lblLinear').style.opacity = '1';
+    }, 1300);
+    setTimeout(() => {
+      const eP = document.getElementById('endPower'); eP.setAttribute('r', '7');
+      eP.style.transition = 'r .3s ease';
+      document.getElementById('lblPower').style.transition = 'opacity .5s ease';
+      document.getElementById('lblPower').style.opacity = '1';
+    }, 1900);
+
+    // count up
+    const span = document.getElementById('gapMult');
+    let start = null;
+    const dur = 1400;
+    function step(ts) {
+      if (start == null) start = ts;
+      const t = Math.min(1, (ts - start) / dur);
+      const ease = 1 - Math.pow(1 - t, 3);
+      span.textContent = Math.round(ease * 10);
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if (wrap) wrap.__onIn = run;
+})();
+
+/* ============ DIST CHART (Bell + Power) ============ */
+(function distChart() {
+  const bell = document.getElementById('bellPath');
+  const power = document.getElementById('powerPath');
+  // build bell: gaussian centered at x=550, baseline 340
+  function bellY(x) {
+    const m = 550, s = 130, A = 220;
+    return 340 - A * Math.exp(-0.5 * Math.pow((x - m) / s, 2));
+  }
+  let bd = '';
+  for (let x = 60; x <= 1040; x += 6) {
+    bd += (x === 60 ? 'M' : 'L') + x + ',' + bellY(x).toFixed(2);
+  }
+  bd += ' L1040,340 L60,340 Z';
+  bell.setAttribute('d', bd);
+  let blen = bell.getTotalLength();
+  bell.style.strokeDasharray = blen;
+  bell.style.strokeDashoffset = blen;
+
+  // power: decays from left, with long tail
+  function powY(x) {
+    const t = (x - 60) / 980; // 0..1
+    return 340 - 240 * Math.exp(-6 * t) - 20 * Math.exp(-1.2 * t);
+  }
+  let pd = '';
+  for (let x = 60; x <= 1040; x += 6) {
+    pd += (x === 60 ? 'M' : 'L') + x + ',' + powY(x).toFixed(2);
+  }
+  pd += ' L1040,340 L60,340 Z';
+  power.setAttribute('d', pd);
+  let plen = power.getTotalLength();
+  power.style.strokeDasharray = plen;
+  power.style.strokeDashoffset = plen;
+
+  // animation on reveal
+  const wrap = bell.closest('.reveal');
+  function run() {
+    bell.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(.2,.7,.2,1)';
+    bell.style.strokeDashoffset = '0';
+    power.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(.2,.7,.2,1) .2s';
+    power.style.strokeDashoffset = '0';
+    setTimeout(() => {
+      document.getElementById('bellAnnotation').style.transition = 'opacity .6s';
+      document.getElementById('bellAnnotation').style.opacity = '1';
+    }, 900);
+    setTimeout(() => {
+      document.getElementById('powerAnnotation').style.transition = 'opacity .6s';
+      document.getElementById('powerAnnotation').style.opacity = '1';
+    }, 1300);
+  }
+  if (wrap) wrap.__onIn = run;
+
+  // toggle
+  document.querySelectorAll('[data-dist]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-dist]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const mode = btn.dataset.dist;
+      bell.style.transition = 'opacity .4s ease';
+      power.style.transition = 'opacity .4s ease';
+      bell.style.opacity  = mode === 'power' ? 0.1 : 1;
+      power.style.opacity = mode === 'bell'  ? 0.1 : 1;
+      document.getElementById('bellAnnotation').style.opacity  = mode === 'power' ? 0 : 1;
+      document.getElementById('powerAnnotation').style.opacity = mode === 'bell'  ? 0 : 1;
+    });
+  });
+})();
+
+/* ============ PAST/PRESENT/FUTURE TIMELINE ============ */
+(function ppf() {
+  const line = document.getElementById('ppfLine');
+  const wrap = line.closest('.reveal');
+  function run() {
+    line.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.2,.7,.2,1)';
+    line.style.strokeDashoffset = '0';
+    setTimeout(() => {
+      document.getElementById('ppfNodes').style.transition = 'opacity .5s';
+      document.getElementById('ppfNodes').style.opacity = '1';
+      document.getElementById('ppfLabels').style.transition = 'opacity .5s';
+      document.getElementById('ppfLabels').style.opacity = '1';
+      document.getElementById('ppfSubA').style.transition = 'opacity .5s';
+      document.getElementById('ppfSubA').style.opacity = '1';
+      document.getElementById('ppfSubB').style.transition = 'opacity .5s .1s';
+      document.getElementById('ppfSubB').style.opacity = '1';
+      document.getElementById('ppfSubC').style.transition = 'opacity .5s .2s';
+      document.getElementById('ppfSubC').style.opacity = '1';
+    }, 800);
+  }
+  if (wrap) wrap.__onIn = run;
+})();
+
+/* ============ MASTERY OF PAST TABS ============ */
+(function tabs() {
+  const QS = {
+    '5y': {
+      anchor: 'May 2021',
+      items: [
+        ['Where were you in life and business?'],
+        ['What\'s DIFFERENT now vs. May 2021?'],
+        ['How are YOU different now vs. May 2021?'],
+        ['Biggest growth and results created since then?'],
+        ['Most powerful experiences?'],
+        ['Most unexpected changes?'],
+        ['What were the "big rocks" of the previous 5 years?']
+      ]
+    },
+    '1y': {
+      anchor: 'May 2025',
+      items: [
+        ['Where were you in life and business?'],
+        ['What\'s DIFFERENT now vs. May 2025?'],
+        ['How are YOU different now vs. May 2025?'],
+        ['Biggest growth and results created since then?'],
+        ['Most powerful experiences?'],
+        ['Most unexpected changes?'],
+        ['What were the "big rocks" of the previous year?']
+      ]
+    },
+    '90d': {
+      anchor: 'Feb 2026',
+      items: [
+        ['Where were you in life and business?'],
+        ['What\'s DIFFERENT now vs. Feb 2026?'],
+        ['How are YOU different now vs. Feb 2026?'],
+        ['Biggest growth and results created since then?'],
+        ['Most powerful experiences?'],
+        ['Most unexpected changes?'],
+        ['What were the "big rocks" of the previous 90 days?']
+      ]
+    }
+  };
+  const list = document.getElementById('qList');
+  function render(key) {
+    const set = QS[key];
+    list.innerHTML = set.items.map((it, i) =>
+      `<div class="q"><div class="n">0${i+1}</div><div class="t">${it[0]}</div></div>`
+    ).join('');
+  }
+  render('5y');
+  document.querySelectorAll('.tabs [data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render(btn.dataset.tab);
+    });
+  });
+})();
+
+/* ============ INTERACTIVE BELL TIERS ============ */
+(function tiers() {
+  const svg = document.getElementById('tierChart');
+  const bell = document.getElementById('tierBell');
+  const fill = document.getElementById('tierFill');
+  const mark = document.getElementById('tierMark');
+  const dot  = document.getElementById('tierDot');
+  const lbl  = document.getElementById('tierLabel');
+  const pct  = document.getElementById('tierPct');
+
+  // bell with long tail (log scale presentation)
+  const W = 1100, baseY = 310, topPad = 30;
+  function bY(x) {
+    // skewed log-normal-ish curve, peak left of center
+    const t = (x - 60) / 980; // 0..1
+    const k = 5.2;
+    const peak = 0.18;
+    const v = Math.pow(t / peak, 1.6) * Math.exp(k * (1 - t / peak));
+    const norm = v / (Math.pow(1, 1.6) * Math.exp(0));
+    return baseY - Math.min(260, 260 * norm);
+  }
+  // build bell path
+  let bd = '';
+  for (let x = 60; x <= 1040; x += 4) {
+    bd += (x === 60 ? 'M' : 'L') + x + ',' + bY(x).toFixed(2);
+  }
+  bell.setAttribute('d', bd);
+
+  // tier x positions (left to right) — based roughly on log of revenue
+  const tiers = [
+    { x: 230,  label: '$50k median',      pct: '≈ 50th percentile', sx: 60,   ex: 360 },
+    { x: 460,  label: '$500k small biz',  pct: 'Top ~30%',          sx: 360,  ex: 620 },
+    { x: 720,  label: '$5m operator',     pct: 'Top ~4%',           sx: 620,  ex: 850 },
+    { x: 960,  label: '$50m+ tail',       pct: 'Top ~0.4%',         sx: 850,  ex: 1040 }
+  ];
+
+  function setTier(i) {
+    const t = tiers[i];
+    // build fill segment of bell between sx and ex
+    let p = `M${t.sx},${baseY} `;
+    for (let x = t.sx; x <= t.ex; x += 4) p += `L${x},${bY(x).toFixed(2)} `;
+    p += `L${t.ex},${baseY} Z`;
+    fill.setAttribute('d', p);
+
+    const cy = bY(t.x);
+    mark.setAttribute('x1', t.x); mark.setAttribute('x2', t.x);
+    mark.setAttribute('y1', cy);  mark.setAttribute('y2', baseY);
+    dot.setAttribute('cx', t.x);  dot.setAttribute('cy', cy);
+    lbl.setAttribute('x', t.x);   lbl.setAttribute('y', Math.max(28, cy - 22));
+    lbl.textContent = t.label;
+    pct.setAttribute('x', t.x);   pct.setAttribute('y', Math.max(48, cy - 6));
+    pct.textContent = t.pct;
+  }
+  setTier(0);
+
+  document.querySelectorAll('[data-tier]').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-tier]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      setTier(parseInt(btn.dataset.tier, 10));
+    });
+  });
+
+  // animate bell stroke + counters on reveal
+  const wrap = svg.closest('.reveal');
+  function run() {
+    const len = bell.getTotalLength();
+    bell.style.strokeDasharray = len;
+    bell.style.strokeDashoffset = len;
+    requestAnimationFrame(() => {
+      bell.style.transition = 'stroke-dashoffset 1.8s cubic-bezier(.2,.7,.2,1)';
+      bell.style.strokeDashoffset = '0';
+    });
+    // count stat A from 0 -> 34
+    function counter(id, to, suffix, dur, decimals=0) {
+      const el = document.getElementById(id);
+      let start;
+      function step(ts) {
+        if (start == null) start = ts;
+        const t = Math.min(1, (ts - start) / dur);
+        const e = 1 - Math.pow(1 - t, 3);
+        const v = (to * e).toFixed(decimals);
+        el.innerHTML = v + suffix;
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    counter('cmpA', 34,   '<span class="unit">M</span>',   1400);
+    counter('cmpB', 76,   '<span class="unit">%</span>',   1400);
+    counter('cmpC', 0.04, '<span class="unit">%</span>',   1600, 2);
+  }
+  if (wrap) wrap.__onIn = run;
+})();
+
+/* ============ FLOOR BARS ============ */
+(function floor() {
+  const g = document.getElementById('floorBars');
+  // 18 activities — most fall below the floor (golden line at y=160)
+  const N = 18;
+  const W = 1100, baseY = 280, floorY = 160;
+  const xPad = 60, w = (W - xPad * 2) / N - 6;
+  const seed = [0.18,0.42,0.31,0.55,0.74,0.38,0.62,0.27,0.45,0.31,0.91,0.34,0.49,0.22,0.83,0.41,0.29,0.97];
+  let html = '';
+  for (let i = 0; i < N; i++) {
+    const x = xPad + i * ((W - xPad * 2) / N);
+    const h = seed[i] * 230;
+    const y = baseY - h;
+    const above = (baseY - h) < floorY;
+    const fill = above ? 'var(--gold)' : 'var(--slate)';
+    const op   = above ? 1 : 0.45;
+    html += `<rect data-i="${i}" x="${x}" y="${baseY}" width="${w}" height="0" fill="${fill}" opacity="${op}" rx="1"/>`;
+    html += `<rect class="target" data-target-i="${i}" data-final-y="${y}" data-final-h="${h}" x="${x}" y="${baseY}" width="${w}" height="0" fill="transparent"/>`;
+  }
+  g.innerHTML = html;
+
+  const svg = document.getElementById('floorSvg');
+  const wrap = svg.closest('.reveal');
+  function run() {
+    const rects = g.querySelectorAll('rect[data-i]');
+    rects.forEach((r, i) => {
+      const t = parseInt(r.getAttribute('data-i'), 10);
+      const finalH = seed[t] * 230;
+      const finalY = baseY - finalH;
+      r.style.transition = `y .9s cubic-bezier(.2,.7,.2,1) ${i*0.04}s, height .9s cubic-bezier(.2,.7,.2,1) ${i*0.04}s`;
+      r.setAttribute('y', finalY);
+      r.setAttribute('height', finalH);
+    });
+    // floor line
+    const fl = document.getElementById('floorLine');
+    fl.setAttribute('y1', floorY);
+    fl.setAttribute('y2', floorY);
+    fl.setAttribute('x2', 60);
+    fl.style.transition = 'x2 1.2s cubic-bezier(.2,.7,.2,1) .8s';
+    requestAnimationFrame(() => fl.setAttribute('x2', 1040));
+    setTimeout(() => {
+      const lab = document.getElementById('floorLineLabel');
+      lab.style.transition = 'opacity .5s ease';
+      lab.style.opacity = '1';
+    }, 1800);
+  }
+  if (wrap) wrap.__onIn = run;
+})();
+
+/* ============ FLYWHEEL ROTATION + SYNC ============ */
+(function flywheel() {
+  const ring = document.getElementById('flyRing');
+  const pointer = document.getElementById('flyPointer');
+  const nodes = document.querySelectorAll('#flywheelList .node');
+  const svg = document.getElementById('flywheel');
+  const wrap = svg.closest('.reveal');
+
+  // ring fill anim
+  let started = false;
+  function run() {
+    if (started) return; started = true;
+    ring.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(.2,.7,.2,1)';
+    ring.style.strokeDashoffset = '0';
+    auto();
+  }
+  if (wrap) wrap.__onIn = run;
+
+  const angles = [-90, 0, 90, 180]; // top, right, bottom, left
+  let active = 0;
+  function setActive(i) {
+    active = i;
+    nodes.forEach((n, k) => n.classList.toggle('active', k === i));
+    const a = angles[i];
+    pointer.style.transition = 'transform 1s cubic-bezier(.2,.7,.2,1)';
+    pointer.style.transformOrigin = '250px 250px';
+    pointer.style.transform = `rotate(${a + 90}deg)`;
+  }
+
+  let timer;
+  function auto() {
+    clearInterval(timer);
+    timer = setInterval(() => setActive((active + 1) % 4), 2800);
+  }
+  nodes.forEach((n, i) => {
+    n.addEventListener('click', () => { setActive(i); auto(); });
+    n.addEventListener('mouseenter', () => { setActive(i); auto(); });
+  });
+})();
+</script>
+
+</body>
+</html>
