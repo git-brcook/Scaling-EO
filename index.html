@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Growth vs. Scale — The Scaling Framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="progress"><div class="bar" id="progressBar"></div></div>
+
+<nav class="top" id="topnav">
+  <div class="brand">Growth<span class="dot"></span><i>Scale</i></div>
+  <ul>
+    <li><a href="#frame" data-link>The Framework</a></li>
+    <li><a href="#powerlaw" data-link>Power Law</a></li>
+    <li><a href="#strategy" data-link>Strategy</a></li>
+    <li><a href="#scale" data-link>Scale</a></li>
+    <li><a href="#vision" data-link>10x Vision</a></li>
+  </ul>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="container">
+    <div class="reveal eyebrow">A Scaling Workshop · May 2026</div>
+    <h1 class="display reveal delay-1" style="margin-top: 28px;">
+      <span class="line">Growth</span>
+      <span class="line right"><i style="font-family:'Instrument Serif'; color:var(--gold);">vs.</i> Scale</span>
+    </h1>
+    <p class="lead reveal delay-2" style="margin-top: 56px; max-width: 56ch;">
+      Growth is linear &mdash; more inputs, more outputs.
+      Scale is a <span class="glow">power law</span> &mdash; the same inputs produce
+      ten, a hundred, a thousand times the result. This is the framework that separates the two.
+    </p>
+    <div class="hero-meta reveal delay-3" style="margin-top: 80px;">
+      <div class="item"><div class="k">01 — Frame</div><div class="v">Operate from the future, not the past.</div></div>
+      <div class="item"><div class="k">02 — Floor</div><div class="v">Raise what you tolerate. Cut what compounds backwards.</div></div>
+      <div class="item"><div class="k">03 — Focus</div><div class="v">Concentrate every ounce on the power-law axis.</div></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="line"></div>Scroll</div>
+</section>
+
+<!-- ============ THE 10X GAP ============ -->
+<section id="gap">
+  <div class="container">
+    <div class="reveal eyebrow">The 10x Gap</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 18ch;">
+      The linear path is not <i>slower</i>.<br>
+      It's a <span class="glow">different path</span>.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 32px;">
+      Most people optimize the road they're already on. But a 10x outcome is rarely reached by
+      running harder. It's reached by choosing a different curve — one that compounds.
+    </p>
+
+    <div class="reveal delay-3" style="margin-top: 72px;">
+      <div class="chart-card">
+        <div class="row between" style="margin-bottom: 32px;">
+          <div>
+            <div class="axis-y">Growth</div>
+            <div class="serif" style="font-size: 30px;">Linear vs. Power-Law over 1 Year</div>
+          </div>
+          <div class="stat" style="text-align:right; align-items:flex-end;">
+            <div class="v"><span id="gapMult">10</span><span class="unit">×</span></div>
+            <div class="l">Gap at Day 365</div>
+          </div>
+        </div>
+
+        <svg viewBox="0 0 900 360" id="gapChart" style="width: 100%; height: auto; display: block;">
+          <!-- grid -->
+          <g stroke="var(--line-soft)" stroke-width="1">
+            <line x1="60" y1="40"  x2="880" y2="40"/>
+            <line x1="60" y1="120" x2="880" y2="120"/>
+            <line x1="60" y1="200" x2="880" y2="200"/>
+            <line x1="60" y1="280" x2="880" y2="280"/>
+            <line x1="60" y1="320" x2="880" y2="320"/>
+          </g>
+          <!-- y axis labels -->
+          <g font-family="JetBrains Mono" font-size="10" fill="var(--muted)">
+            <text x="50" y="44"  text-anchor="end">1000</text>
+            <text x="50" y="124" text-anchor="end">750</text>
+            <text x="50" y="204" text-anchor="end">500</text>
+            <text x="50" y="284" text-anchor="end">250</text>
+            <text x="50" y="324" text-anchor="end">0</text>
+          </g>
+          <!-- x axis -->
+          <g font-family="JetBrains Mono" font-size="10" fill="var(--muted)">
+            <text x="60"  y="345">Month 0</text>
+            <text x="470" y="345" text-anchor="middle">Month 6</text>
+            <text x="880" y="345" text-anchor="end">Month 12</text>
+          </g>
+
+          <!-- linear -->
+          <path id="linePathLinear" d="M60,320 L880,288"
+            stroke="var(--slate)" stroke-width="2" fill="none"
+            stroke-dasharray="900" stroke-dashoffset="900"/>
+          <!-- power -->
+          <path id="linePathPower" d=""
+            stroke="var(--gold)" stroke-width="3" fill="none"
+            stroke-dasharray="1400" stroke-dashoffset="1400"/>
+
+          <!-- end markers (filled in by JS) -->
+          <circle id="endLinear" cx="880" cy="288" r="0" fill="var(--slate)"/>
+          <circle id="endPower" cx="880" cy="40" r="0" fill="var(--gold)"/>
+
+          <!-- labels at end -->
+          <text id="lblLinear" x="868" y="280" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="var(--slate-deep)" opacity="0">The Linear Path · 100</text>
+          <text id="lblPower"  x="868" y="32"  text-anchor="end" font-family="Instrument Serif" font-style="italic" font-size="18" fill="var(--ink)" opacity="0">The best path & people · 1,000</text>
+        </svg>
+
+        <div class="chart-legend">
+          <div class="item"><span class="swatch"></span> Linear growth · same path, more hours</div>
+          <div class="item"><span class="swatch gold thick"></span> Power-law scale · different axis, compounding pathway</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PEOPLE ARE A POWER LAW ============ -->
+<section id="powerlaw" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="row between" style="align-items: flex-end; gap: 56px; flex-wrap: wrap;">
+      <div style="max-width: 640px;">
+        <div class="reveal eyebrow">People &amp; Performance</div>
+        <h2 class="display reveal delay-1" style="margin-top: 24px;">
+          A bell curve is the average.<br>
+          A <i>power law</i> is the <span class="glow">outlier</span>.
+        </h2>
+        <p class="lead reveal delay-2" style="margin-top: 28px;">
+          Pay attention to where the world distributes by averages, and where a tiny minority owns
+          almost all of the result. The decision of which curve you're operating on changes everything.
+        </p>
+      </div>
+      <div class="reveal delay-3 toggle-row" role="tablist" aria-label="Distribution toggle">
+        <button class="active" data-dist="both">Compare</button>
+        <button data-dist="bell">Bell Curve</button>
+        <button data-dist="power">Power Law</button>
+      </div>
+    </div>
+
+    <div class="reveal delay-4" style="margin-top: 56px;">
+      <div class="chart-card" style="padding: 48px 36px 32px;">
+        <svg viewBox="0 0 1100 380" id="distChart" style="width: 100%; height: auto; display: block;">
+          <!-- baseline -->
+          <line x1="60" y1="340" x2="1040" y2="340" stroke="var(--line)" stroke-width="1"/>
+          <!-- bell curve -->
+          <path id="bellPath" d="" fill="rgba(128,148,152,0.15)" stroke="var(--slate)" stroke-width="2"
+            stroke-dasharray="2200" stroke-dashoffset="2200"/>
+          <!-- power curve -->
+          <path id="powerPath" d="" fill="rgba(204,186,120,0.18)" stroke="var(--gold)" stroke-width="2.5"
+            stroke-dasharray="1600" stroke-dashoffset="1600"/>
+
+          <!-- bell labels (sigma) -->
+          <g id="bellLabels" font-family="JetBrains Mono" font-size="10" fill="var(--muted)" opacity="1">
+            <text x="200" y="362" text-anchor="middle">−2σ</text>
+            <text x="370" y="362" text-anchor="middle">−1σ</text>
+            <text x="550" y="362" text-anchor="middle">μ</text>
+            <text x="730" y="362" text-anchor="middle">+1σ</text>
+            <text x="900" y="362" text-anchor="middle">+2σ</text>
+          </g>
+
+          <!-- text annotations -->
+          <text id="bellAnnotation" x="550" y="180" text-anchor="middle"
+                font-family="Instrument Serif" font-style="italic" font-size="22" fill="var(--slate-deep)" opacity="0">Bell Curve · most cluster around the mean</text>
+          <text id="powerAnnotation" x="180" y="120" text-anchor="start"
+                font-family="Instrument Serif" font-style="italic" font-size="22" fill="var(--ink)" opacity="0">Power Law · a few outliers carry the result</text>
+        </svg>
+
+        <div class="chart-legend" style="margin-top: 8px;">
+          <div class="item"><span class="swatch"></span> Bell curve — averages, defended ranges</div>
+          <div class="item"><span class="swatch gold"></span> Power law — outliers, compounding tails</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Pull quote ============ -->
+<section class="pullquote">
+  <div class="narrow reveal">
+    <span class="mark">“</span>
+    <blockquote>
+      The self is not a thing but a process; it uses the future to organize the present.
+    </blockquote>
+    <cite>Dr. Roy Baumeister</cite>
+  </div>
+</section>
+
+<!-- ============ THE SCALING FRAMEWORK ============ -->
+<section id="frame">
+  <div class="container">
+    <div class="reveal eyebrow">The Scaling Framework</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 18ch;">
+      Operate from the <span class="glow">future</span>, not the past.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 32px;">
+      The past is feedback; the present is where work happens; but only the future can organize
+      both. The framework rests on three operating moves — apply them in order and the rest follows.
+    </p>
+
+    <!-- timeline graphic -->
+    <div class="reveal delay-3" style="margin-top: 72px;">
+      <svg viewBox="0 0 1100 160" style="width: 100%; height: auto; display: block;">
+        <line id="ppfLine" x1="80" y1="80" x2="1020" y2="80" stroke="var(--line)" stroke-width="1"
+              stroke-dasharray="940" stroke-dashoffset="940"/>
+        <g id="ppfNodes" opacity="0">
+          <circle cx="160"  cy="80" r="8" fill="var(--slate)"/>
+          <circle cx="550"  cy="80" r="8" fill="var(--slate)"/>
+          <circle cx="940"  cy="80" r="14" fill="var(--gold)"/>
+          <circle cx="940"  cy="80" r="22" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.4"/>
+        </g>
+        <g font-family="Instrument Serif" font-size="28" fill="var(--ink)" id="ppfLabels" opacity="0">
+          <text x="160"  y="130" text-anchor="middle" fill="var(--muted)">Past</text>
+          <text x="550"  y="130" text-anchor="middle" fill="var(--muted)">Present</text>
+          <text x="940"  y="130" text-anchor="middle"><tspan font-style="italic">Future</tspan></text>
+        </g>
+        <text x="160" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="var(--muted)" id="ppfSubA" opacity="0">FEEDBACK</text>
+        <text x="550" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="var(--muted)" id="ppfSubB" opacity="0">EXECUTION</text>
+        <text x="940" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="var(--gold)" id="ppfSubC" opacity="0">ORGANIZER</text>
+      </svg>
+    </div>
+
+    <div class="frame-list">
+      <div class="cell reveal">
+        <div class="n">01 / Frame</div>
+        <div class="h">Set the future.</div>
+        <div class="p">An impossible goal — 10x in 3 years, not 10–20 — does the strategic work. When the frame is high enough, only one or two paths survive. Position validates itself through the goal; analysis doesn't.</div>
+      </div>
+      <div class="cell reveal delay-1">
+        <div class="n">02 / Floor</div>
+        <div class="h">Raise the line.</div>
+        <div class="p">Define the standard below which you refuse to operate. Most businesses are below their floor in 80% of activity. Complexity is how power-law operators get sucked back into the bell curve.</div>
+      </div>
+      <div class="cell reveal delay-2">
+        <div class="n">03 / Focus</div>
+        <div class="h">One axis. All weight.</div>
+        <div class="p">Concentrate on the few pathways and compounding assets that produce power-law returns. Innovation is saying no to a thousand good things to commit to the one that compounds.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MASTERY OF PAST ============ -->
+<section id="past" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="reveal eyebrow">Mastery of the Past</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 20ch;">
+      Before the future organizes you,<br>integrate <i>where you've been</i>.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 32px;">
+      A short reflection exercise across three time horizons. Pick a horizon. Walk the questions slowly.
+    </p>
+
+    <div class="reveal delay-3" style="margin-top: 64px;">
+      <div class="tabs" role="tablist">
+        <button class="active" data-tab="5y">5 Years<span class="sub">May 2021</span></button>
+        <button data-tab="1y">1 Year<span class="sub">May 2025</span></button>
+        <button data-tab="90d">90 Days<span class="sub">Feb 2026</span></button>
+      </div>
+
+      <div class="q-list" id="qList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Pull quote ============ -->
+<section class="pullquote">
+  <div class="narrow reveal">
+    <span class="mark">“</span>
+    <blockquote>
+      Innovation is saying <i>no</i> to a thousand things.
+    </blockquote>
+    <cite>Steve Jobs</cite>
+  </div>
+</section>
+
+<!-- ============ IDENTIFYING POWER LAW (interactive bell w/ revenue tiers) ============ -->
+<section id="identify">
+  <div class="container">
+    <div class="reveal eyebrow">Identifying the Power Law</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 22ch;">
+      Where do you actually sit<br>on the <span class="glow">revenue curve</span>?
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 28px;">
+      Of roughly 34 million companies in the US, the distribution is brutal. Click a tier to see where
+      it lives on the curve — and how thin the air gets above it.
+    </p>
+
+    <div class="reveal delay-3 bell-wrap" style="margin-top: 56px;">
+      <div class="chart-card" style="padding: 40px 36px 24px;">
+        <svg viewBox="0 0 1100 360" id="tierChart" style="width: 100%; height: auto; display: block;">
+          <line x1="60" y1="310" x2="1040" y2="310" stroke="var(--line)" stroke-width="1"/>
+          <path id="tierBell" d="" fill="rgba(128,148,152,0.10)" stroke="var(--slate)" stroke-width="1.5"/>
+          <path id="tierFill" d="" fill="rgba(204,186,120,0.45)" stroke="none" style="transition: d .6s ease;"/>
+          <line id="tierMark" x1="0" y1="0" x2="0" y2="0" stroke="var(--gold)" stroke-width="2" stroke-dasharray="4 4"/>
+          <circle id="tierDot" cx="0" cy="0" r="6" fill="var(--gold)"/>
+          <text id="tierLabel" x="0" y="0" font-family="Instrument Serif" font-style="italic" font-size="22" fill="var(--ink)" text-anchor="middle"></text>
+          <text id="tierPct"   x="0" y="0" font-family="JetBrains Mono" font-size="11" fill="var(--muted)" text-anchor="middle"></text>
+        </svg>
+      </div>
+
+      <div class="tier-row" role="tablist">
+        <button class="active" data-tier="0">
+          <span class="v">$50<small style="font-size:18px;">k</small></span>
+          <span class="label">Median · most companies</span>
+        </button>
+        <button data-tier="1">
+          <span class="v">$500<small style="font-size:18px;">k</small></span>
+          <span class="label">Solid small business</span>
+        </button>
+        <button data-tier="2">
+          <span class="v">$5<small style="font-size:18px;">m</small></span>
+          <span class="label">~Top 4% in the US</span>
+        </button>
+        <button data-tier="3">
+          <span class="v">$50<small style="font-size:18px;">m</small></span>
+          <span class="label">~Top 0.4% · the tail</span>
+        </button>
+      </div>
+
+      <div style="margin-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
+        <div class="stat"><div class="v" id="cmpA">34<span class="unit">M</span></div><div class="l">Companies in the US</div></div>
+        <div class="stat"><div class="v" id="cmpB">76<span class="unit">%</span></div><div class="l">Of value captured by category leaders</div></div>
+        <div class="stat"><div class="v" id="cmpC">0.04<span class="unit">%</span></div><div class="l">Reach a $50m run-rate</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE POWER LAW STRATEGY — 3 LEVELS ============ -->
+<section id="strategy" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="reveal eyebrow">The Power Law Strategy</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 20ch;">
+      Three levels of <i>engineering</i><br>non-substitutable outcomes.
+    </h2>
+
+    <div class="levels">
+      <div class="lvl reveal">
+        <div class="num">1</div>
+        <div class="kicker">Strategy</div>
+        <h3>What you choose</h3>
+        <div class="sub">Position outside competition</div>
+        <p>Own an axis no one else competes on. Better is bell-curve work; different is power-law work. Define the category — don't fight to win one.</p>
+      </div>
+      <div class="lvl reveal delay-1">
+        <div class="num">2</div>
+        <div class="kicker">System</div>
+        <h3>What you remove</h3>
+        <div class="sub">Raise the floor</div>
+        <p>Cut everything that can't scale. Simplify what remains until it compounds. Every activity you keep is a force pulling you toward the mean.</p>
+      </div>
+      <div class="lvl reveal delay-2">
+        <div class="num">3</div>
+        <div class="kicker">Scale</div>
+        <h3>What you build</h3>
+        <div class="sub">Compound the moat</div>
+        <p>Concentrate on the few pathways and compounding assets that produce power-law returns. Depth becomes the moat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEVEL 1: DIFFERENT, NOT BETTER ============ -->
+<section id="level1">
+  <div class="container">
+    <div class="reveal eyebrow">Level 01 — Strategy</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px;">
+      Be <i>different</i>,<br>
+      <span class="strike">not better.</span>
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 28px;">
+      Strategy is escape, not victory. Competition is for losers — the goal is to occupy an axis where
+      no one else is competing in the first place.
+    </p>
+
+    <div class="principle-grid">
+      <div class="principle reveal">
+        <div class="tag">Principle 01</div>
+        <div class="head">The impossible goal does the strategic work.</div>
+        <div class="body">When the frame is high enough, only one or two paths survive. Position validates itself through the goal — analysis doesn't.</div>
+      </div>
+      <div class="principle reveal delay-1">
+        <div class="tag">Principle 02</div>
+        <div class="head">Own an axis no one else competes on.</div>
+        <div class="body">Better is bell-curve work. Different is power-law work. The whole game is finding — and committing to — a non-substitutable position.</div>
+      </div>
+      <div class="principle reveal delay-2">
+        <div class="tag">Principle 03</div>
+        <div class="head">The 76% rule.</div>
+        <div class="body">Category leaders capture roughly three-quarters of the value. There is no prize for second place in a power-law market.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEVEL 2: RAISE THE FLOOR ============ -->
+<section id="level2" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="reveal eyebrow">Level 02 — System</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 22ch;">
+      Raise the <span class="glow">floor</span>.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 28px;">
+      Most businesses operate below their floor in 80% of activity. Every task you keep that lives
+      below the line is a force quietly pulling you back to the mean.
+    </p>
+
+    <div class="reveal delay-3" style="margin-top: 72px;">
+      <div class="floor-fig">
+        <!-- floor diagram -->
+        <svg viewBox="0 0 1100 320" style="width: 100%; height: auto; display: block;" id="floorSvg">
+          <!-- bars -->
+          <g id="floorBars"></g>
+          <!-- floor line -->
+          <line id="floorLine" x1="60" y1="160" x2="60" y2="160" stroke="var(--gold)" stroke-width="2"/>
+          <text id="floorLineLabel" x="1040" y="152" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="var(--gold)" opacity="0">THE FLOOR · 99.99th percentile of your axis</text>
+        </svg>
+
+        <div class="floor-row" style="margin-top: 48px;">
+          <div class="floor-card reveal">
+            <div class="lbl">The amateur</div>
+            <div class="h">Tries to do too much.</div>
+            <p>Spreads attention across every activity, every opportunity, every audience — and ends up running every system below its floor.</p>
+          </div>
+          <div class="floor-card reveal delay-1" style="background: var(--ink); color: var(--bg); border-color: var(--ink);">
+            <div class="lbl" style="color: var(--gold);">The professional</div>
+            <div class="h" style="color: var(--bg);">Refuses below the floor.</div>
+            <p style="color: rgba(255,255,255,0.78);">Cuts anything below the 99.99th percentile of the axis. Knows the cost of complexity. Defends the line ruthlessly.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEVEL 3: SCALE / FLYWHEEL ============ -->
+<section id="scale">
+  <div class="container">
+    <div class="reveal eyebrow">Level 03 — Scale</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 22ch;">
+      Compound the <i>moat</i>.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 28px;">
+      Depth is the moat. Most stop at competence — mastery is the willingness to go deeper for years
+      past it. Once depth, distribution, and IP feed each other, the flywheel runs on its own.
+    </p>
+
+    <div class="flywheel-wrap">
+      <!-- flywheel SVG -->
+      <div class="reveal">
+        <svg viewBox="0 0 500 500" id="flywheel" style="width: 100%; height: auto; display: block;">
+          <!-- ring -->
+          <circle cx="250" cy="250" r="180" fill="none" stroke="var(--line)" stroke-width="1"/>
+          <circle cx="250" cy="250" r="180" fill="none" stroke="var(--gold)" stroke-width="2"
+                  stroke-dasharray="1131" stroke-dashoffset="1131" id="flyRing"
+                  transform="rotate(-90 250 250)"/>
+          <!-- center -->
+          <circle cx="250" cy="250" r="58" fill="var(--ink)"/>
+          <text x="250" y="244" text-anchor="middle" font-family="JetBrains Mono" font-size="9" letter-spacing="2" fill="var(--gold)">COMPOUNDING</text>
+          <text x="250" y="266" text-anchor="middle" font-family="Instrument Serif" font-style="italic" font-size="20" fill="var(--bg)">flywheel</text>
+
+          <!-- nodes -->
+          <g id="flyNodes" font-family="Manrope" font-size="13" fill="var(--ink)">
+            <!-- positions: top, right, bottom, left -->
+            <g class="flynode" data-i="0">
+              <circle cx="250" cy="70"  r="10" fill="var(--gold)"/>
+              <text x="250" y="48"  text-anchor="middle" font-family="Instrument Serif" font-size="20">Body of Work</text>
+              <text x="250" y="100" text-anchor="middle" font-size="11" fill="var(--muted)">Book · Method · IP</text>
+            </g>
+            <g class="flynode" data-i="1">
+              <circle cx="430" cy="250" r="10" fill="var(--slate)"/>
+              <text x="430" y="232" text-anchor="end" font-family="Instrument Serif" font-size="20">Better Product</text>
+              <text x="430" y="266" text-anchor="end" font-size="11" fill="var(--muted)">AI tools · Framework</text>
+            </g>
+            <g class="flynode" data-i="2">
+              <circle cx="250" cy="430" r="10" fill="var(--gold)"/>
+              <text x="250" y="416" text-anchor="middle" font-family="Instrument Serif" font-size="20">Inbound Demand</text>
+              <text x="250" y="460" text-anchor="middle" font-size="11" fill="var(--muted)">Reputation compounds</text>
+            </g>
+            <g class="flynode" data-i="3">
+              <circle cx="70"  cy="250" r="10" fill="var(--slate)"/>
+              <text x="70"  y="232" text-anchor="start" font-family="Instrument Serif" font-size="20">Distribution</text>
+              <text x="70"  y="266" text-anchor="start" font-size="11" fill="var(--muted)">Super-Whos · 10–100×</text>
+            </g>
+          </g>
+
+          <!-- rotating pointer -->
+          <g id="flyPointer">
+            <line x1="250" y1="250" x2="250" y2="92" stroke="var(--gold)" stroke-width="1.5"/>
+            <circle cx="250" cy="92" r="4" fill="var(--gold)"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="flywheel-list" id="flywheelList">
+        <div class="node active" data-i="0">
+          <div class="n">01</div>
+          <div class="h">Body of work<small>Book, methodology, intellectual property.</small></div>
+          <div class="arrow">→</div>
+        </div>
+        <div class="node" data-i="1">
+          <div class="n">02</div>
+          <div class="h">Better product<small>AI tools, framework — productized depth.</small></div>
+          <div class="arrow">→</div>
+        </div>
+        <div class="node" data-i="2">
+          <div class="n">03</div>
+          <div class="h">Inbound demand<small>Reputation compounds. Cases sharpen the method.</small></div>
+          <div class="arrow">→</div>
+        </div>
+        <div class="node" data-i="3">
+          <div class="n">04</div>
+          <div class="h">Super-Whos &amp; distribution<small>10–100× performers and institutional partners.</small></div>
+          <div class="arrow">→</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10X VISION ============ -->
+<section id="vision" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="reveal eyebrow">10x Vision Workshop</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px; max-width: 22ch;">
+      Operate &amp; organize<br>from the <i>scale</i>, not the climb.
+    </h2>
+    <p class="lead reveal delay-2" style="margin-top: 28px;">
+      The future doesn't arrive — you reverse-engineer back from it. Six questions to translate your
+      power-law axis into a 3-year, fully-specified result.
+    </p>
+
+    <div class="q-list" style="margin-top: 72px;">
+      <div class="q reveal"><div class="n">01</div><div class="t">What does literal <i>10x</i> look like for you — not in 10–20 years, but 3?</div></div>
+      <div class="q reveal delay-1"><div class="n">02</div><div class="t">What would the 10x <i>result</i> be?</div></div>
+      <div class="q reveal"><div class="n">03</div><div class="t">If you operated completely <i>from</i> that 10x result, how would that change what you're doing now?</div></div>
+      <div class="q reveal delay-1"><div class="n">04</div><div class="t">What would the 10x model be? How many units, at what price, to whom?</div></div>
+      <div class="q reveal"><div class="n">05</div><div class="t">What — and who — would fall below the floor, that you're currently doing?</div></div>
+      <div class="q reveal delay-1"><div class="n">06</div><div class="t">Who would you need to involve? What are the power-law pathways to reach 10x in 3 years?</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEEP / GOING DEEPER ============ -->
+<section class="deep">
+  <div class="container">
+    <div class="reveal eyebrow">Going Deeper</div>
+    <h2 class="display reveal delay-1" style="margin-top: 24px;">
+      What <i>is</i> your<br>power law?
+    </h2>
+
+    <ul style="margin-top: 64px;">
+      <li class="reveal"><span class="dash">—</span><span>Operating from the future, not the past.</span></li>
+      <li class="reveal delay-1"><span class="dash">—</span><span>Isolating what would work — a possible power law.</span></li>
+      <li class="reveal delay-2"><span class="dash">—</span><span>Eliminating everything below the floor.</span></li>
+      <li class="reveal delay-3"><span class="dash">—</span><span>Mastering the power law — building the team and capability to do it.</span></li>
+      <li class="reveal delay-4"><span class="dash">—</span><span>Separating so far from competition that no one is doing what you're doing. <i style="color:var(--gold);">n of 1.</i></span></li>
+    </ul>
+
+    <div class="closing">
+      <div class="reveal"><div class="q"><small>Question 01</small>What &ldquo;power law&rdquo; would you scale?</div></div>
+      <div class="reveal delay-1"><div class="q"><small>Question 02</small>What would that look like, if you fully executed on it?</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div>Growth vs. Scale — A Scaling Framework Workshop</div>
+  <div>Webpage adapted from the May 2026 keynote</div>
+</footer>
+
+<script src="app.js"></script>
+
+</body>
+</html>
